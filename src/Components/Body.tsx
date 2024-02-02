@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { trackPromise } from 'react-promise-tracker';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import './Body.css';
 import logo from '../assets/logo.png';
 import infoIcon from '../assets/Info.png';
@@ -14,7 +14,7 @@ export default function Body(props) {
   const [loading, setLoading] = useState(false);
   const [faucetBalance, setFaucetBalance] = useState('0 tEDG');
   const [limit, setLimit] = useState(10);
-  const [faucetAddress, setFaucetAddress] = useState('5FqJAzaUYtPFYKeo7mRKweTfLCQKKdeHgNft7eRSgcPV1fXq');
+  const [faucetAddress, setFaucetAddress] = useState('nJvnbNuabPyqFVqUwgDbD5nxBT9mBKMv1qhCA25esiRJ1Wn');
   const [loadingBalance, setLoadingBalance] = useState(false);
 
   function callAPI() {
@@ -32,7 +32,7 @@ export default function Body(props) {
     logEvent(constant.log.REQUEST_EDG_CALLED, {address, chain, amount});
     trackPromise(
       fetch(
-        `https://beresheet-faucet.herokuapp.com/api/sendTokens?address=${address}&chain=${chain}&amount=${amount}`,
+        `https://beresheet-faucet-backend.vercel.app/api/sendTokens?address=${address}&chain=${chain}&amount=${amount}`,
       )
         .then((res) => res.json())
         .then((res) => {
@@ -75,29 +75,29 @@ export default function Body(props) {
     navigator.clipboard.writeText(faucetAddress);
   }
 
-  async function getFaucetBalance() {
-    setLoadingBalance(true);
-    logEvent(constant.log.GET_BALANCE_CALLED, {});
-    await fetch('https://beresheet-faucet.herokuapp.com/api/faucetinfo')
-        .then((res) => res.json())
-        .then((res: any) => {
-          setFaucetBalance(res.balance ? res.balance : 0);
-          setFaucetAddress(res.address ? res.address : faucetAddress);
-          setLimit(res.max ? res.max : 10);
-          logEvent(constant.log.GET_BALANCE_SUCCEED, {balance: res?.balance});
-        })
-        .catch((err) => {
-          console.log(err);
-          logEvent(constant.log.GET_BALANCE_FAILED, {error: err});
-        })
-        .finally(() => {
-          setLoadingBalance(false);
-        });
-  }
+  const getFaucetBalance = useCallback(async () => {
+  setLoadingBalance(true);
+  logEvent(constant.log.GET_BALANCE_CALLED, {});
+  await fetch('https://beresheet-faucet-backend.vercel.app/api/faucetinfo')
+    .then((res) => res.json())
+    .then((res) => {
+      setFaucetBalance(res.balance ? res.balance : 0);
+      setFaucetAddress(res.address ? res.address : faucetAddress);
+      setLimit(res.max ? res.max : 10);
+      logEvent(constant.log.GET_BALANCE_SUCCEED, {balance: res?.balance});
+    })
+    .catch((err) => {
+      console.log(err);
+      logEvent(constant.log.GET_BALANCE_FAILED, {error: err});
+    })
+    .finally(() => {
+      setLoadingBalance(false);
+    });
+}, [faucetAddress]);
 
-  useEffect(() => {
-    getFaucetBalance();
-  }, []);
+useEffect(() => {
+  getFaucetBalance();
+}, [getFaucetBalance]);
 
   return (
     <div className="pageBackground">
