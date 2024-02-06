@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect} from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { useState } from 'react';
 import './Body.css';
@@ -32,7 +32,7 @@ export default function Body(props) {
     logEvent(constant.log.REQUEST_EDG_CALLED, {address, chain, amount});
     trackPromise(
       fetch(
-        `https://beresheet-faucet.herokuapp.com/api/sendTokens?address=${address}&chain=${chain}&amount=${amount}`,
+        `http://localhost:9000/api/sendTokens?address=${address}&chain=${chain}&amount=${amount}`,
       )
         .then((res) => res.json())
         .then((res) => {
@@ -78,7 +78,7 @@ export default function Body(props) {
   async function getFaucetBalance() {
     setLoadingBalance(true);
     logEvent(constant.log.GET_BALANCE_CALLED, {});
-    await fetch('https://beresheet-faucet.herokuapp.com/api/faucetinfo')
+    await fetch('http://localhost:9000/api/faucetinfo')
         .then((res) => res.json())
         .then((res: any) => {
           setFaucetBalance(res.balance ? res.balance : 0);
@@ -132,7 +132,7 @@ export default function Body(props) {
                 ></input>
               </div>
               <div className="submitButton" onClick={callAPI}>
-                {!loading ? 'Request EDG' : <div className="loader"></div>}
+                {!loading ? 'Request TEDG' : <div className="loader"></div>}
               </div>
             </div>
           </div>
